@@ -1,0 +1,28 @@
+FROM cimg/elixir:1.13.4-node
+
+ENV ARCH="x86_64"
+
+ENV RUST_VERSION="1.60.0"
+ENV LANG="ja_JP.UTF-8"
+
+ENV RUST_ARCHIVE="rust-$RUST_VERSION-$ARCH-unknown-linux-gnu.tar.gz"
+ENV RUST_DOWNLOAD_URL="https://static.rust-lang.org/dist/$RUST_ARCHIVE"
+
+USER root
+
+RUN apt-get update && apt-get install \
+      curl gcc make git vim \
+      ca-certificates libc6-dev inotify-tools \
+      -qqy --no-install-recommends \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# rust
+RUN set -ex \
+    && mkdir -p /usr/local/src/rust && cd /usr/local/src/rust \
+    && curl -fsOSL $RUST_DOWNLOAD_URL \
+    && curl -s $RUST_DOWNLOAD_URL.sha256 | sha256sum -c - \
+    && tar -C /usr/local/src/rust -xzf $RUST_ARCHIVE --strip-components=1 \
+    && rm $RUST_ARCHIVE \
+    && ./install.sh
+
